@@ -50,7 +50,7 @@ public class Certificate {
     public Student getStudent() { return student; }
     public void setStudent(Student student) { this.student = student; }
 
-    // ✅ Getter & Setter for pdfUrl
+    // Getter & Setter for pdfUrl
     public String getPdfUrl() { return pdfUrl; }
     public void setPdfUrl(String pdfUrl) { this.pdfUrl = pdfUrl; }
 

@@ -34,7 +34,7 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable());
 
-        // 🔥 ENABLE CORS FOR REACT FRONTEND
+        // ENABLE CORS FOR REACT FRONTEND
         http.cors(cors -> {});
 
         http.authorizeHttpRequests(auth -> auth

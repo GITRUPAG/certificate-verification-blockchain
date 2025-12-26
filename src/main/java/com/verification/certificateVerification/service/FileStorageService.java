@@ -24,7 +24,7 @@ public class FileStorageService {
 
         Files.write(filePath, file.getBytes());
 
-        return fileName; // only filename
+        return fileName; 
     }
 }
 

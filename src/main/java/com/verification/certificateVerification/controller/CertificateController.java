@@ -149,19 +149,18 @@ public ResponseEntity<?> verifyCertificate(@RequestBody Map<String, Object> requ
         return ResponseEntity.ok(Map.of("verified", false));
     }
 
-    // ✅ USE HASHMAP INSTEAD OF Map.of()
+   
     Map<String, Object> response = new HashMap<>();
 
     response.put("verified", true);
 
-    // Student proof
     response.put("studentName", cert.getStudent().getName());
     response.put("studentId", cert.getStudent().getStudentId());
     response.put("courseName", cert.getStudent().getCourseName());
     response.put("degreeType", cert.getStudent().getDegreeType());
     response.put("academicYear", cert.getStudent().getAcademicYear());
 
-    // Certificate proof
+    
     response.put("certificateId", cert.getId());
     response.put("certificateKey", cert.getCertificateKey());
     response.put("issuedAt", cert.getIssuedAt());

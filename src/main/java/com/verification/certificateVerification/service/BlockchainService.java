@@ -37,7 +37,7 @@ public class BlockchainService {
     private String contractAddress;
 
     /**
-     * ✅ Store certificate hash on blockchain with a UNIQUE KEY
+     * Store certificate hash on blockchain with a UNIQUE KEY
      * certificateKey = studentId + "-" + certificateName
      */
     public String storeHash(String certificateKey, String hash) throws Exception {
@@ -78,7 +78,7 @@ public class BlockchainService {
     }
 
     /**
-     * ✅ Read stored hash using UNIQUE certificateKey
+     *  Read stored hash using UNIQUE certificateKey
      */
     public String getHash(String certificateKey) throws Exception {
 
@@ -107,7 +107,7 @@ public class BlockchainService {
         return decoded.get(0).getValue().toString();
     }
 
-    // ✅ Utility
+    // Utility
     private static String bytesToHex(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte b : bytes) result.append(String.format("%02x", b));

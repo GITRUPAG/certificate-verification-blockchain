@@ -151,7 +151,7 @@ public Certificate verifyAndGetCertificate(String studentId, Long certificateId)
         return null;
     }
 
-    // ✅ VERIFIED — return full certificate as proof
+    // VERIFIED — return full certificate as proof
     return cert;
 }
 
