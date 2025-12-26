@@ -1,7 +1,11 @@
 package com.verification.certificateVerification.service;
 
-import java.util.Optional;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.verification.certificateVerification.model.Certificate;
 import com.verification.certificateVerification.model.Student;
@@ -10,11 +14,6 @@ import com.verification.certificateVerification.repository.StudentRepository;
 import com.verification.certificateVerification.util.HashUtil;
 
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +49,8 @@ public class CertificateService {
 
         Long certificateId = temp.getId();
 
+        String certificateName = file.getOriginalFilename();
+
         // Step 3: Create unique certificateKey
         // EXAMPLE: STU101-5
         String certificateKey = studentId + "-" + certificateId;
@@ -61,10 +62,14 @@ public class CertificateService {
         String txHash = blockchain.storeHash(certificateKey, hash);
 
         // Step 6: Save PDF locally
-        String pdfUrl = fileStorageService.saveFile(file, studentId);
+        String savedFileName = fileStorageService.saveFile(file, studentId);
+
+        // Create public URL for viewing PDF in browser
+        String pdfUrl = "http://localhost:8080/api/files/" + savedFileName;
 
         // Step 7: Update certificate with all details
         temp.setCertificateKey(certificateKey);
+        temp.setCertificateName(certificateName);
         temp.setHash(hash);
         temp.setBlockchainTx(txHash);
         temp.setIssuedAt(Instant.now());
@@ -118,6 +123,36 @@ public class CertificateService {
 
 public List<Certificate> getCertificatesByStudentId(String studentId) {
     return certRepo.findByStudent_StudentId(studentId);
+}
+
+public Certificate verifyAndGetCertificate(String studentId, Long certificateId) throws Exception {
+
+    // Step 1: Load certificate
+    Certificate cert = certRepo.findById(certificateId)
+            .orElse(null);
+
+    if (cert == null) return null;
+
+    // Step 2: Validate student
+    if (!cert.getStudent().getStudentId().equals(studentId)) {
+        return null;
+    }
+
+    // Step 3: Recalculate hash
+    String recalculatedHash = HashUtil.sha256(cert.getCertificateKey());
+
+    // Step 4: Fetch blockchain hash
+    String storedHash = blockchain.getHash(cert.getCertificateKey());
+
+    if (storedHash == null) return null;
+
+    // Step 5: Compare
+    if (!recalculatedHash.equalsIgnoreCase(storedHash)) {
+        return null;
+    }
+
+    // ✅ VERIFIED — return full certificate as proof
+    return cert;
 }
 
 

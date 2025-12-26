@@ -1,6 +1,5 @@
 package com.verification.certificateVerification.service;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,22 +11,20 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileStorageService {
 
-    private final String uploadDir = "uploads/";
-
-    public FileStorageService() {
-        File folder = new File(uploadDir);
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-    }
+    private static final String UPLOAD_DIR = "uploads";
 
     public String saveFile(MultipartFile file, String studentId) throws IOException {
-        String fileName = studentId + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(uploadDir + fileName);
+
+        Files.createDirectories(Paths.get(UPLOAD_DIR));
+
+        String fileName =
+                studentId + "_" + System.currentTimeMillis() + ".pdf";
+
+        Path filePath = Paths.get(UPLOAD_DIR).resolve(fileName);
 
         Files.write(filePath, file.getBytes());
 
-        // Return URL (local server URL for download)
-        return "/uploads/" + fileName;
+        return fileName; // only filename
     }
 }
+

@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.verification.certificateVerification.model.Student;
 import com.verification.certificateVerification.model.User;
+import com.verification.certificateVerification.repository.StudentRepository;
 import com.verification.certificateVerification.repository.UserRepository;
 import com.verification.certificateVerification.security.JwtUtil;
-import com.verification.certificateVerification.repository.StudentRepository;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -107,6 +107,40 @@ public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String
 
     return ResponseEntity.ok(response);
 }
+
+@PostMapping("/admin/signup")
+public ResponseEntity<Map<String, Object>> registerAdmin(
+        @RequestBody Map<String, String> adminMap) {
+
+    String username = adminMap.get("username");
+    String email = adminMap.get("email");
+    String password = adminMap.get("password");
+
+    if (userRepository.existsByEmail(email)) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Admin already exists"));
+    }
+
+    User admin = new User(
+            username,
+            email,
+            passwordEncoder.encode(password)
+    );
+
+    admin.getRoles().add("ROLE_ADMIN");
+
+    userRepository.save(admin);
+
+    String token = jwtUtil.generateToken(username);
+
+    return ResponseEntity.ok(Map.of(
+            "token", token,
+            "username", username,
+            "email", email,
+            "roles", admin.getRoles()
+    ));
+}
+
 
 
 }

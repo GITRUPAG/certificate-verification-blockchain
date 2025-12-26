@@ -40,7 +40,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
 
                 // Public endpoints
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/**","/api/files/**" ).permitAll()
                 .requestMatchers("/api/certificates/verify").permitAll()
                 .requestMatchers("/api/certificates/issue").permitAll()
                 .requestMatchers("/api/certificates/student/**").permitAll()
