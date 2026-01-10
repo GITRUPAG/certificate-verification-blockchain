@@ -5,6 +5,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import VerifyCertificate from "./pages/VerifyCertificate";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PublicVerify from "./pages/PublicVerify";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
         {/* PUBLIC VERIFICATION */}
         <Route path="/verify" element={<VerifyCertificate />} />
         <Route path="/verify/:studentId/:certificateId" element={<VerifyCertificate />} />
+        <Route path="/public-verify" element={<PublicVerify />} />
 
         {/* DEFAULT */}
         <Route path="*" element={<Login />} />
