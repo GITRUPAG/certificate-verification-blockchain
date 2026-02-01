@@ -23,6 +23,7 @@ public class CertificateService {
     private final CertificateRepository certRepo;
     private final BlockchainService blockchain;
     private final FileStorageService fileStorageService;
+    private final EmailService emailService;
 
     /**
      * ISSUE CERTIFICATE (UPLOAD PDF)
@@ -125,16 +126,53 @@ public List<Certificate> getCertificatesByStudentId(String studentId) {
     return certRepo.findByStudent_StudentId(studentId);
 }
 
+// public Certificate verifyAndGetCertificate(String studentId, Long certificateId) throws Exception {
+
+//     // Step 1: Load certificate
+//     Certificate cert = certRepo.findById(certificateId)
+//             .orElse(null);
+
+//     if (cert == null) return null;
+
+//     // Step 2: Validate student
+//     if (!cert.getStudent().getStudentId().equals(studentId)) {
+//         return null;
+//     }
+
+//     // Step 3: Recalculate hash
+//     String recalculatedHash = HashUtil.sha256(cert.getCertificateKey());
+
+//     // Step 4: Fetch blockchain hash
+//     String storedHash = blockchain.getHash(cert.getCertificateKey());
+
+//     if (storedHash == null) return null;
+
+//     // Step 5: Compare
+//     if (!recalculatedHash.equalsIgnoreCase(storedHash)) {
+//         return null;
+//     }
+
+//     // VERIFIED — return full certificate as proof
+//     return cert;
+// }
 public Certificate verifyAndGetCertificate(String studentId, Long certificateId) throws Exception {
 
     // Step 1: Load certificate
-    Certificate cert = certRepo.findById(certificateId)
-            .orElse(null);
+    Certificate cert = certRepo.findById(certificateId).orElse(null);
 
-    if (cert == null) return null;
+    if (cert == null) {
+        return null;
+    }
 
     // Step 2: Validate student
     if (!cert.getStudent().getStudentId().equals(studentId)) {
+        // ❌ Email: invalid student
+        emailService.sendVerificationResult(
+                cert.getStudent().getEmail(),
+                cert.getStudent().getName(),
+                cert.getCertificateKey(),
+                false
+        );
         return null;
     }
 
@@ -144,15 +182,20 @@ public Certificate verifyAndGetCertificate(String studentId, Long certificateId)
     // Step 4: Fetch blockchain hash
     String storedHash = blockchain.getHash(cert.getCertificateKey());
 
-    if (storedHash == null) return null;
+    boolean verified =
+            storedHash != null &&
+            recalculatedHash.equalsIgnoreCase(storedHash);
 
-    // Step 5: Compare
-    if (!recalculatedHash.equalsIgnoreCase(storedHash)) {
-        return null;
-    }
+    // 📧 Step 5: Send Email (SUCCESS or FAILURE)
+    emailService.sendVerificationResult(
+            cert.getStudent().getEmail(),
+            cert.getStudent().getName(),
+            cert.getCertificateKey(),
+            verified
+    );
 
-    // VERIFIED — return full certificate as proof
-    return cert;
+    // Step 6: Return certificate only if verified
+    return verified ? cert : null;
 }
 
 
